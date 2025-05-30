@@ -46,7 +46,6 @@ export default function RootLayout({ children }: RootLayoutProps) {
           colorText: "#ffffff",
           colorBackground: "#0f172a", // un azul oscuro (slate-900)
           borderRadius: "0.5rem",
-          left: "1rem",
         },
       }}
     >
