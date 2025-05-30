@@ -6,7 +6,7 @@ interface ProductCardProps {
   index: number
 }
 
-export default function ProductCard({ laptop, index }: ProductCardProps): JSX.Element {
+export default function ProductCard({ laptop, index }: ProductCardProps){
   const animationDelay = `animate-delay-${(index + 1) * 100}`
   
   return (

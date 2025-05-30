@@ -3,7 +3,7 @@ interface Stat {
   label: string
 }
 
-export default function About(): JSX.Element {
+export default function About() {
   const stats: Stat[] = [
     { number: '500+', label: 'Portátiles Vendidos' },
     { number: '3+', label: 'Años de Experiencia' },

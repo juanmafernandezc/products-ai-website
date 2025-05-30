@@ -6,7 +6,7 @@ import About from '../../components/About'
 import Contact from '../../components/Contact'
 import Footer from '../../components/Footer'
 
-export default function Home(): JSX.Element {
+export default function Home() {
   return (
     <main>
       <Header />

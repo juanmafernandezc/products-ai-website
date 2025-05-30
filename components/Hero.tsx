@@ -1,6 +1,6 @@
 'use client'
 
-export default function Hero(): JSX.Element {
+export default function Hero() {
   const scrollToProducts = (): void => {
     const element = document.getElementById('productos')
     if (element) {

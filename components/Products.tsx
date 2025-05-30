@@ -1,7 +1,7 @@
 import { laptops } from '../data/laptops'
 import ProductCard from './ProductCard'
 
-export default function Products(): JSX.Element {
+export default function Products() {
   return (
     <section id="productos" className="py-20 bg-black">
       <div className="max-w-7xl mx-auto px-6 lg:px-8">
