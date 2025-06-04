@@ -1,18 +1,19 @@
-export interface LaptopSpecs {
-  processor: string
-  ram: string
-  storage: string
-  screen: string
-}
-
 export interface Laptop {
   id: number
   name: string
   brand: string
+  category: string
   price: number
   image: string
-  specs: LaptopSpecs
-  category: 'gaming' | 'trabajo' | 'estudiantes'
+  specs: {
+    processor: string
+    ram: string
+    storage: string
+    screen: string
+    graphics?: string // Nuevo campo opcional
+  }
+  description?: string // Nuevo campo opcional para productos de usuarios
+  isUserGenerated?: boolean // Flag para identificar productos de usuarios
 }
 
 export const laptops: Laptop[] = [
