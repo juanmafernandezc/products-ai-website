@@ -49,7 +49,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
         },
       }}
     >
-      <html lang="es">
+      <html lang="es" suppressHydrationWarning>
         {/* Aquí combinamos las clases de cuerpo de ambas versiones.
             La segunda versión tenía 'bg-gray-900 text-white',
             la primera tenía `${geistSans.variable} ${geistMono.variable} bg-black text-gray-100 min-h-screen antialiased`.
