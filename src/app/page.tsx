@@ -5,6 +5,7 @@ import Products from '../../components/Products'
 import About from '../../components/About'
 import Contact from '../../components/Contact'
 import Footer from '../../components/Footer'
+import LaptopList from '../../components/LaptopList';
 
 export default function Home() {
   return (
