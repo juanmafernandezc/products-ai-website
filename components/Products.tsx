@@ -112,7 +112,7 @@ export default function Products() {
     { id: 'todos', nombre: 'Todos' },
     { id: 'gaming', nombre: 'Gaming' },
     { id: 'trabajo', nombre: 'Trabajo' },
-    { id: 'estudiantes', nombre: 'Estudiantes' },
+    { id: 'estudiante', nombre: 'Estudiante' },
     { id: 'creadores', nombre: 'Creadores' },
     { id: 'otros', nombre: 'Otros' }
   ]
