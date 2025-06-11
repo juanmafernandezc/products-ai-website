@@ -1,4 +1,3 @@
-// src/services/laptopService.ts
 
 // Interfaz base para laptop (coincide con tu API de C#)
 export interface ApiLaptop {
@@ -12,9 +11,12 @@ export interface ApiLaptop {
   almacenamientogb: number;
   precio: number;
   pulgadas: number;
-  grafica?: string;
+  grafica?: string; // Puede ser "TarjetaGrafica" en el backend
   descripcion?: string;
 }
+
+
+
 
 // Interfaz para el frontend (la que usas en Products.tsx)
 export interface Laptop {
@@ -47,6 +49,8 @@ export interface FormData {
   descripcion: string;
 }
 
+
+
 class LaptopService {
   private baseUrl: string;
 
@@ -73,21 +77,21 @@ class LaptopService {
   }
 
   // Convertir FormData a formato API
-  private convertFormToApi(formData: FormData): Omit<ApiLaptop, 'id'> {
-    return {
-      image: formData.image,
-      categoria: formData.categoria,
-      marca: formData.marca,
-      modelo: formData.modelo,
-      procesador: formData.procesador,
-      ramgb: parseInt(formData.ramgb),
-      almacenamientogb: parseInt(formData.almacenamientogb),
-      precio: parseFloat(formData.precio),
-      pulgadas: parseFloat(formData.pulgadas),
-      grafica: formData.grafica || "Integrada",
-      descripcion: formData.descripcion || undefined
-    };
-  }
+ private convertFormToApi(formData: FormData): Omit<ApiLaptop, 'id'> {
+  return {
+    image: formData.image,
+    categoria: formData.categoria,
+    marca: formData.marca,
+    modelo: formData.modelo,
+    procesador: formData.procesador,
+    ramgb: parseInt(formData.ramgb),
+    almacenamientogb: parseInt(formData.almacenamientogb),
+    precio: parseFloat(formData.precio),
+    pulgadas: parseFloat(formData.pulgadas),
+    grafica: formData.grafica || "Integrada",
+    descripcion: formData.descripcion || ""
+  };
+}
 
   // Obtener todas las laptops
   async getAllLaptops(): Promise<Laptop[]> {
@@ -180,34 +184,57 @@ class LaptopService {
   }
 
   // Actualizar laptop existente
-  async updateLaptop(id: string, formData: FormData): Promise<ApiLaptop> {
+  // Actualizar laptop existente
+async updateLaptop(id: string, formData: FormData): Promise<void> {
+  try {
+    const laptopData = this.convertFormToApi(formData);
+    
+    // Crear el objeto completo que espera la API
+    const updatePayload = {
+      id: id, // Incluir el ID como string o GUID
+      image: laptopData.image,
+      categoria: laptopData.categoria,
+      marca: laptopData.marca,
+      modelo: laptopData.modelo,
+      procesador: laptopData.procesador,
+      ramgb: laptopData.ramgb,
+      almacenamientogb: laptopData.almacenamientogb,
+      precio: laptopData.precio,
+      pulgadas: laptopData.pulgadas,
+      grafica: laptopData.grafica,
+      descripcion: laptopData.descripcion
+    };
+    
+    console.log('Enviando datos de actualización:', updatePayload);
+    
+    const response = await fetch(`${this.baseUrl}/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(updatePayload)
+    });
 
-        
-    try {
-      const laptopData = this.convertFormToApi(formData);
-
-      const id = this.getAllLaptopsForAdmin()
-      
-      const response = await fetch(`${this.baseUrl}/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ ...laptopData, id })
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Error ${response.status}: ${errorText}`);
-      }
-
-      return await response.json();
-      
-    } catch (error) {
-      console.error('Error updating laptop:', error);
-      throw error instanceof Error ? error : new Error('Error al actualizar laptop');
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Error ${response.status}: ${errorText}`);
     }
+
+    // No intentar parsear JSON si la respuesta es NoContent (204)
+    if (response.status === 204) {
+      return; // UpdateLaptop devuelve NoContent(), no JSON
+    }
+
+    // Solo si hay contenido, intentar parsearlo
+    if (response.headers.get('content-length') !== '0') {
+      return await response.json();
+    }
+    
+  } catch (error) {
+    console.error('Error updating laptop:', error);
+    throw error instanceof Error ? error : new Error('Error al actualizar laptop');
   }
+}
 
   // Eliminar laptop
   async deleteLaptop(id: string): Promise<void> {
