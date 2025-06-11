@@ -77,6 +77,7 @@ export default function Products() {
       }
       
       const data: ApiLaptop[] = await response.json()
+      
       console.log('Datos recibidos:', data)
       console.log('Número de laptops:', Array.isArray(data) ? data.length : 'No es array')
       
