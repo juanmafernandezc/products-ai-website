@@ -1,4 +1,5 @@
 import './globals.css'
+import FloatingNav from '../../components/FloatingNav'
 import { Metadata } from 'next'
 import {
   ClerkProvider,

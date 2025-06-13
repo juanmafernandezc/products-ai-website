@@ -6,10 +6,12 @@ import { useUser } from '@clerk/nextjs'
 import Header from '../../../../components/Header'
 import Footer from '../../../../components/Footer'
 import { laptopService, type ApiLaptop, type FormData } from '../../../services/laptopservices'
+import { useScrollToAnchor } from '../../../app/hooks/useNavigations'
 
 export default function GestorProductos() {
   const { user, isSignedIn, isLoaded } = useUser()
   const router = useRouter()
+  const { navigateToSection } = useScrollToAnchor()
   const [isLoading, setIsLoading] = useState(false)
   const [laptops, setLaptops] = useState<ApiLaptop[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -193,12 +195,53 @@ export default function GestorProductos() {
     laptop.categoria.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
+  const BackToHomeButton = () => (
+  <div className="flex justify-between items-center mb-6">
+    <button
+      onClick={() => router.push('/')}
+      className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+    >
+      ← Volver al Inicio
+    </button>
+    <h1 className="text-3xl font-bold text-white">Panel de Administración</h1>
+    <div></div>
+  </div>
+)
+
+const QuickAccessButtons = () => (
+  <div className="bg-gray-800 rounded-lg p-6 mb-8">
+    <h3 className="text-white font-semibold mb-4">Acceso Rápido</h3>
+    <div className="flex flex-wrap gap-3">
+      <button
+        onClick={() => navigateToSection('/', 'products')}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+      >
+        🛍️ Ver Productos Públicos
+      </button>
+      <button
+        onClick={() => navigateToSection('/', 'categories')}
+        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+      >
+        📂 Ver Categorías
+      </button>
+      <button
+        onClick={() => navigateToSection('/', 'contact')}
+        className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+      >
+        📞 Contacto
+      </button>
+    </div>
+  </div>
+)
+
   return (
     <main className="min-h-screen bg-gray-900">
       <Header />
       
       <section className="py-16 px-6">
         <div className="max-w-6xl mx-auto">
+          <BackToHomeButton />
+          <QuickAccessButtons />
           {/* Mensajes de estado */}
           {error && (
             <div className="bg-red-600 text-white p-4 rounded-lg mb-6 flex items-center justify-between">

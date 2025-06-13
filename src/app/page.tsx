@@ -5,17 +5,26 @@ import Products from '../../components/Products'
 import About from '../../components/About'
 import Contact from '../../components/Contact'
 import Footer from '../../components/Footer'
-import LaptopList from '../../components/LaptopList';
 
 export default function Home() {
   return (
     <main>
       <Header />
-      <Hero />
-      <Categories />
-      <Products />
-      <About />
-      <Contact />
+      <section id="hero">
+        <Hero />
+      </section>
+      <section id="categories">
+        <Categories />
+      </section>
+      <section id="products">
+        <Products />
+      </section>
+      <section id="about">
+        <About />
+      </section>
+      <section id="contact">
+        <Contact />
+      </section>
       <Footer />
     </main>
   )
