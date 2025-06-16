@@ -9,13 +9,23 @@ import LaptopList from '../../components/LaptopList';
 
 export default function Home() {
   return (
-    <main>
+     <main>
       <Header />
-      <Hero />
-      <Categories />
-      <Products />
-      <About />
-      <Contact />
+      <section id="hero">
+        <Hero />
+      </section>
+      <section id="categories">
+        <Categories />
+      </section>
+      <section id="products">
+        <Products />
+      </section>
+      <section id="about">
+        <About />
+      </section>
+      <section id="contact">
+        <Contact />
+      </section>
       <Footer />
     </main>
   )

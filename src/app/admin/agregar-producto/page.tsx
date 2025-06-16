@@ -1,54 +1,56 @@
-'use client'
+"use client"
 
-import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { useUser } from '@clerk/nextjs'
-import Header from '../../../../components/Header'
-import Footer from '../../../../components/Footer'
-import { laptopService, type ApiLaptop, type FormData } from '../../../services/laptopservices'
+import type React from "react"
+
+import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { useUser } from "@clerk/nextjs"
+import Header from "../../../../components/Header"
+import Footer from "../../../../components/Footer"
+import { laptopService, type ApiLaptop, type FormData } from "../../../services/laptopservices"
+import { useScrollToAnchor } from "../../hooks/useNavigations"
 
 export default function GestorProductos() {
   const { user, isSignedIn, isLoaded } = useUser()
   const router = useRouter()
+  const { navigateToSection } = useScrollToAnchor()
   const [isLoading, setIsLoading] = useState(false)
   const [laptops, setLaptops] = useState<ApiLaptop[]>([])
   const [editingId, setEditingId] = useState<string | null>(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [laptopToDelete, setLaptopToDelete] = useState<string | null>(null)
-  const [activeTab, setActiveTab] = useState<'add' | 'manage'>('add')
-  const [searchTerm, setSearchTerm] = useState('')
+  const [laptopToDelete, setLaptopToDelete] = useState<ApiLaptop | null>(null)
+  const [activeTab, setActiveTab] = useState<"add" | "manage">("add")
+  const [searchTerm, setSearchTerm] = useState("")
   const [error, setError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
-  
+  const [isDeleting, setIsDeleting] = useState(false)
+
   const [formData, setFormData] = useState<FormData>({
-    image: '',
-    categoria: 'Gaming',
-    marca: '',
-    modelo: '',
-    procesador: '',
-    ramgb: '',
-    almacenamientogb: '',
-    precio: '',
-    pulgadas: '',
-    grafica: '',
-    descripcion: ''
+    image: "",
+    categoria: "Gaming",
+    marca: "",
+    modelo: "",
+    procesador: "",
+    ramgb: "",
+    almacenamientogb: "",
+    precio: "",
+    pulgadas: "",
+    grafica: "",
+    descripcion: "",
   })
 
-  // Cargar laptops al iniciar
   useEffect(() => {
     if (isSignedIn) {
       fetchLaptops()
     }
   }, [isSignedIn])
 
-  // Redirigir si no está autenticado
   useEffect(() => {
     if (isLoaded && !isSignedIn) {
-      router.push('/')
+      router.push("/")
     }
   }, [isSignedIn, isLoaded, router])
 
-  // Auto-ocultar mensajes después de 5 segundos
   useEffect(() => {
     if (successMessage) {
       const timer = setTimeout(() => setSuccessMessage(null), 5000)
@@ -68,10 +70,10 @@ export default function GestorProductos() {
       setError(null)
       const data = await laptopService.getAllLaptopsForAdmin()
       setLaptops(data)
-      console.log('Laptops cargadas:', data.length)
+      console.log("Laptops cargadas:", data.length)
     } catch (error) {
-      console.error('Error al cargar laptops:', error)
-      setError(error instanceof Error ? error.message : 'Error al cargar laptops')
+      console.error("Error al cargar laptops:", error)
+      setError(error instanceof Error ? error.message : "Error al cargar laptops")
     }
   }
 
@@ -92,17 +94,17 @@ export default function GestorProductos() {
 
   const resetForm = () => {
     setFormData({
-      image: '',
-      categoria: 'Gaming',
-      marca: '',
-      modelo: '',
-      procesador: '',
-      ramgb: '',
-      almacenamientogb: '',
-      precio: '',
-      pulgadas: '',
-      grafica: '',
-      descripcion: ''
+      image: "",
+      categoria: "Gaming",
+      marca: "",
+      modelo: "",
+      procesador: "",
+      ramgb: "",
+      almacenamientogb: "",
+      precio: "",
+      pulgadas: "",
+      grafica: "",
+      descripcion: "",
     })
     setEditingId(null)
     setError(null)
@@ -111,9 +113,9 @@ export default function GestorProductos() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }))
   }
 
@@ -122,22 +124,21 @@ export default function GestorProductos() {
     setIsLoading(true)
     setError(null)
     setSuccessMessage(null)
-    
+
     try {
       if (editingId) {
         await laptopService.updateLaptop(editingId, formData)
-        setSuccessMessage('¡Laptop actualizada exitosamente!')
+        setSuccessMessage("¡Laptop actualizada exitosamente!")
       } else {
         await laptopService.createLaptop(formData)
-        setSuccessMessage('¡Laptop agregada exitosamente!')
+        setSuccessMessage("¡Laptop agregada exitosamente!")
       }
 
       await fetchLaptops()
       resetForm()
-      
     } catch (error) {
-      console.error('Error al guardar laptop:', error)
-      setError(error instanceof Error ? error.message : 'Error desconocido al guardar')
+      console.error("Error al guardar laptop:", error)
+      setError(error instanceof Error ? error.message : "Error desconocido al guardar")
     } finally {
       setIsLoading(false)
     }
@@ -154,51 +155,149 @@ export default function GestorProductos() {
       almacenamientogb: laptop.almacenamientogb.toString(),
       precio: laptop.precio.toString(),
       pulgadas: laptop.pulgadas.toString(),
-      grafica: laptop.grafica || '',
-      descripcion: laptop.descripcion || ''
+      grafica: laptop.grafica || "",
+      descripcion: laptop.descripcion || "",
     })
     setEditingId(laptop.id)
-    setActiveTab('add')
+    setActiveTab("add")
     setError(null)
     setSuccessMessage(null)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const handleDelete = (id: string) => {
-    setLaptopToDelete(id)
+  const handleDelete = (laptop: ApiLaptop) => {
+    console.log("🎯 Seleccionando laptop para eliminar:", laptop.id, laptop.marca, laptop.modelo)
+    setLaptopToDelete(laptop)
     setShowDeleteModal(true)
+    console.log("Renderizando página:", showDeleteModal, laptopToDelete)
   }
 
   const confirmDelete = async () => {
-    if (!laptopToDelete) return
-    
+    if (!laptopToDelete) {
+      console.error("❌ No hay laptop seleccionada para eliminar")
+      setError("No hay laptop seleccionada")
+      return
+    }
+
+    console.log("🗑️ Eliminando laptop:", laptopToDelete.id, laptopToDelete.marca, laptopToDelete.modelo)
+    setIsDeleting(true)
+    setError(null)
+
     try {
-      setError(null)
-      await laptopService.deleteLaptop(laptopToDelete)
-      await fetchLaptops()
-      setSuccessMessage('Laptop eliminada exitosamente')
-      
-    } catch (error) {
-      console.error('Error al eliminar laptop:', error)
-      setError(error instanceof Error ? error.message : 'Error al eliminar laptop')
-    } finally {
+      console.log("📡 Llamando a laptopService.deleteLaptop con ID:", laptopToDelete.id)
+      await laptopService.deleteLaptop(laptopToDelete.id)
+
+      console.log("✅ Eliminación exitosa")
+
       setShowDeleteModal(false)
       setLaptopToDelete(null)
+
+      setSuccessMessage(`Laptop "${laptopToDelete.marca} ${laptopToDelete.modelo}" eliminada exitosamente`)
+
+      console.log("🔄 Recargando lista de laptops...")
+      await fetchLaptops()
+    } catch (error) {
+      console.error("💥 Error completo al eliminar:", error)
+
+      const errorMessage = error instanceof Error ? error.message : String(error)
+      setError(`Error al eliminar laptop: ${errorMessage}`)
+    } finally {
+      setIsDeleting(false)
     }
   }
 
-  const filteredLaptops = laptops.filter(laptop =>
-    laptop.modelo.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    laptop.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    laptop.categoria.toLowerCase().includes(searchTerm.toLowerCase())
+  const cancelDelete = () => {
+    console.log("Cancelando eliminación")
+      setShowDeleteModal(false)
+      setLaptopToDelete(null)
+      setIsDeleting(false)
+  }
+
+  const filteredLaptops = laptops.filter(
+    (laptop) =>
+      laptop.modelo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      laptop.marca.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      laptop.categoria.toLowerCase().includes(searchTerm.toLowerCase()),
   )
+
+  const BackToHomeButton = () => (
+    <div className="flex justify-between items-center mb-6">
+      <button
+        onClick={() => router.push("/")}
+        className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+      >
+        ← Volver al Inicio
+      </button>
+      <h1 className="text-3xl font-bold text-white">Panel de Administración</h1>
+      <div></div>
+    </div>
+  )
+
+  const QuickAccessButtons = () => (
+    <div className="bg-gray-800 rounded-lg p-6 mb-8">
+      <h3 className="text-white font-semibold mb-4">Acceso Rápido</h3>
+      <div className="flex flex-wrap gap-3">
+        <button
+          onClick={() => navigateToSection("/", "products")}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+        >
+          🛍️ Ver Productos Públicos
+        </button>
+        <button
+          onClick={() => navigateToSection("/", "categories")}
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+        >
+          📂 Ver Categorías
+        </button>
+        <button
+          onClick={() => navigateToSection("/", "contact")}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+        >
+          📞 Contacto
+        </button>
+      </div>
+    </div>
+  )
+
+  const checkApiConnection = async () => {
+    try {
+      const isHealthy = await laptopService.checkApiHealth()
+      if (isHealthy) {
+        setSuccessMessage("✅ Conexión con la API establecida correctamente")
+        await fetchLaptops()
+      } else {
+        setError("❌ No se puede conectar con la API. Verifica que esté ejecutándose.")
+      }
+    } catch (error) {
+      setError("❌ Error al verificar conexión con la API")
+    }
+  }
 
   return (
     <main className="min-h-screen bg-gray-900">
       <Header />
-      
+
       <section className="py-16 px-6">
         <div className="max-w-6xl mx-auto">
+          <BackToHomeButton />
+          <QuickAccessButtons />
+
+          {/* Panel de estado de la API */}
+          <div className="bg-gray-800 rounded-lg p-4 mb-6">
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <span className="text-white font-semibold">Estado de la API:</span>
+                <span className="text-green-400">🟢 Conectado</span>
+              </div>
+              <button
+                onClick={checkApiConnection}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors duration-200"
+              >
+                🔄 Verificar Conexión
+              </button>
+            </div>
+          </div>
+
           {/* Mensajes de estado */}
           {error && (
             <div className="bg-red-600 text-white p-4 rounded-lg mb-6 flex items-center justify-between">
@@ -206,10 +305,7 @@ export default function GestorProductos() {
                 <span className="text-xl">⚠️</span>
                 <span>{error}</span>
               </div>
-              <button
-                onClick={() => setError(null)}
-                className="text-white hover:text-gray-200 text-xl"
-              >
+              <button onClick={() => setError(null)} className="text-white hover:text-gray-200 text-xl">
                 ✕
               </button>
             </div>
@@ -221,10 +317,7 @@ export default function GestorProductos() {
                 <span className="text-xl">✅</span>
                 <span>{successMessage}</span>
               </div>
-              <button
-                onClick={() => setSuccessMessage(null)}
-                className="text-white hover:text-gray-200 text-xl"
-              >
+              <button onClick={() => setSuccessMessage(null)} className="text-white hover:text-gray-200 text-xl">
                 ✕
               </button>
             </div>
@@ -234,21 +327,17 @@ export default function GestorProductos() {
           <div className="flex justify-center mb-8">
             <div className="bg-gray-800 rounded-lg p-1 flex">
               <button
-                onClick={() => setActiveTab('add')}
+                onClick={() => setActiveTab("add")}
                 className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
-                  activeTab === 'add'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:text-white'
+                  activeTab === "add" ? "bg-blue-600 text-white" : "text-gray-300 hover:text-white"
                 }`}
               >
-                {editingId ? '✏️ Editar Laptop' : '➕ Agregar Laptop'}
+                {editingId ? "✏️ Editar Laptop" : "➕ Agregar Laptop"}
               </button>
               <button
-                onClick={() => setActiveTab('manage')}
+                onClick={() => setActiveTab("manage")}
                 className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
-                  activeTab === 'manage'
-                    ? 'bg-blue-600 text-white'
-                    : 'text-gray-300 hover:text-white'
+                  activeTab === "manage" ? "bg-blue-600 text-white" : "text-gray-300 hover:text-white"
                 }`}
               >
                 🛠️ Gestionar Laptops ({laptops.length})
@@ -257,19 +346,16 @@ export default function GestorProductos() {
           </div>
 
           {/* Formulario de agregar/editar */}
-          {activeTab === 'add' && (
+          {activeTab === "add" && (
             <div className="bg-gray-800 rounded-lg p-8 shadow-xl">
               <h1 className="text-3xl font-bold text-white mb-8 text-center">
-                {editingId ? 'Editar Laptop' : 'Agregar Nueva Laptop'}
+                {editingId ? "Editar Laptop" : "Agregar Nueva Laptop"}
               </h1>
-              
+
               <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Información básica */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Marca *
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Marca *</label>
                     <input
                       type="text"
                       name="marca"
@@ -282,9 +368,7 @@ export default function GestorProductos() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Modelo *
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Modelo *</label>
                     <input
                       type="text"
                       name="modelo"
@@ -299,9 +383,7 @@ export default function GestorProductos() {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Precio (€) *
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Precio (€) *</label>
                     <input
                       type="number"
                       name="precio"
@@ -315,9 +397,7 @@ export default function GestorProductos() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Categoría *
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Categoría *</label>
                     <select
                       name="categoria"
                       value={formData.categoria}
@@ -334,9 +414,7 @@ export default function GestorProductos() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">
-                    URL de la Imagen *
-                  </label>
+                  <label className="block text-white font-semibold mb-2">URL de la Imagen *</label>
                   <input
                     type="url"
                     name="image"
@@ -348,12 +426,9 @@ export default function GestorProductos() {
                   />
                 </div>
 
-                {/* Especificaciones técnicas */}
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Procesador *
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Procesador *</label>
                     <input
                       type="text"
                       name="procesador"
@@ -366,9 +441,7 @@ export default function GestorProductos() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      RAM (GB) *
-                    </label>
+                    <label className="block text-white font-semibold mb-2">RAM (GB) *</label>
                     <input
                       type="number"
                       name="ramgb"
@@ -384,9 +457,7 @@ export default function GestorProductos() {
 
                 <div className="grid md:grid-cols-2 gap-6">
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Almacenamiento (GB) *
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Almacenamiento (GB) *</label>
                     <input
                       type="number"
                       name="almacenamientogb"
@@ -400,9 +471,7 @@ export default function GestorProductos() {
                   </div>
 
                   <div>
-                    <label className="block text-white font-semibold mb-2">
-                      Pulgadas *
-                    </label>
+                    <label className="block text-white font-semibold mb-2">Pulgadas *</label>
                     <input
                       type="number"
                       name="pulgadas"
@@ -419,9 +488,7 @@ export default function GestorProductos() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">
-                    Gráfica
-                  </label>
+                  <label className="block text-white font-semibold mb-2">Gráfica</label>
                   <input
                     type="text"
                     name="grafica"
@@ -433,9 +500,7 @@ export default function GestorProductos() {
                 </div>
 
                 <div>
-                  <label className="block text-white font-semibold mb-2">
-                    Descripción
-                  </label>
+                  <label className="block text-white font-semibold mb-2">Descripción</label>
                   <textarea
                     name="descripcion"
                     value={formData.descripcion}
@@ -446,7 +511,6 @@ export default function GestorProductos() {
                   />
                 </div>
 
-                {/* Botones de acción */}
                 <div className="flex gap-4 pt-6">
                   <button
                     type="submit"
@@ -459,12 +523,10 @@ export default function GestorProductos() {
                         Guardando...
                       </>
                     ) : (
-                      <>
-                        {editingId ? '💾 Actualizar' : '➕ Agregar'} Laptop
-                      </>
+                      <>{editingId ? "💾 Actualizar" : "➕ Agregar"} Laptop</>
                     )}
                   </button>
-                  
+
                   {editingId && (
                     <button
                       type="button"
@@ -480,15 +542,18 @@ export default function GestorProductos() {
           )}
 
           {/* Panel de gestión */}
-          {activeTab === 'manage' && (
+          {activeTab === "manage" && (
             <div className="bg-gray-800 rounded-lg p-8 shadow-xl">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">
-                  Gestionar Laptops ({laptops.length})
-                </h2>
+                <h2 className="text-2xl font-bold text-white">Gestionar Laptops ({laptops.length})</h2>
+                <button
+                  onClick={fetchLaptops}
+                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                >
+                  🔄 Actualizar Lista
+                </button>
               </div>
 
-              {/* Buscador */}
               <div className="mb-6">
                 <input
                   type="text"
@@ -499,12 +564,11 @@ export default function GestorProductos() {
                 />
               </div>
 
-              {/* Lista de laptops */}
               {filteredLaptops.length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">🔍</div>
                   <p className="text-gray-300 text-lg">
-                    {laptops.length === 0 ? 'No hay laptops registradas' : 'No se encontraron resultados'}
+                    {laptops.length === 0 ? "No hay laptops registradas" : "No se encontraron resultados"}
                   </p>
                 </div>
               ) : (
@@ -513,19 +577,19 @@ export default function GestorProductos() {
                     <div key={laptop.id} className="bg-gray-700 rounded-lg p-6 flex items-center gap-6">
                       <div className="w-20 h-20 bg-gray-600 rounded-lg flex-shrink-0 overflow-hidden">
                         <img
-                          src={laptop.image}
+                          src={laptop.image || "/placeholder.svg"}
                           alt={laptop.modelo}
                           className="w-full h-full object-cover"
                           onError={(e) => {
-                            e.currentTarget.style.display = 'none'
-                            e.currentTarget.nextElementSibling?.classList.remove('hidden')
+                            e.currentTarget.style.display = "none"
+                            e.currentTarget.nextElementSibling?.classList.remove("hidden")
                           }}
                         />
                         <div className="hidden w-full h-full flex items-center justify-center text-gray-400 text-xs">
                           Sin imagen
                         </div>
                       </div>
-                      
+
                       <div className="flex-1 min-w-0">
                         <h3 className="text-white font-semibold text-lg truncate">
                           {laptop.marca} {laptop.modelo}
@@ -534,11 +598,12 @@ export default function GestorProductos() {
                           {laptop.categoria} • {laptop.procesador}
                         </p>
                         <p className="text-blue-400 font-semibold">
-                          €{laptop.precio.toLocaleString('es-ES', { minimumFractionDigits: 2 })}
+                          €{laptop.precio.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
                         </p>
                         <p className="text-gray-400 text-xs">
                           {laptop.ramgb}GB RAM • {laptop.almacenamientogb}GB • {laptop.pulgadas}"
                         </p>
+                        <p className="text-gray-500 text-xs">ID: {laptop.id}</p>
                       </div>
 
                       <div className="flex gap-2">
@@ -549,8 +614,9 @@ export default function GestorProductos() {
                           ✏️ Editar
                         </button>
                         <button
-                          onClick={() => handleDelete(laptop.id)}
+                          onClick={() => handleDelete(laptop)}
                           className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                          title={`Eliminar ${laptop.marca} ${laptop.modelo}`}
                         >
                           🗑️ Eliminar
                         </button>
@@ -566,34 +632,54 @@ export default function GestorProductos() {
 
       <Footer />
 
-      {/* Modal de confirmación de eliminación */}
-      {showDeleteModal && (
+      {/* Modal de confirmación de eliminación al final de la página */}
+      {showDeleteModal && laptopToDelete && (
+        
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">Confirmar Eliminación</h3>
-            <p className="text-gray-300 mb-6">
-              ¿Estás seguro de que deseas eliminar esta laptop? Esta acción no se puede deshacer.
-            </p>
+            <h3 className="text-xl font-bold text-white mb-4">🗑️ Confirmar Eliminación</h3>
+            <p className="text-gray-300 mb-2">¿Estás seguro de que deseas eliminar esta laptop?</p>
+            <div className="bg-gray-700 rounded-lg p-4 mb-4">
+              <p className="text-white font-semibold">
+                {laptopToDelete.marca} {laptopToDelete.modelo}
+              </p>
+              
+              <p className="text-gray-400 text-sm">
+                {laptopToDelete.categoria} • €{laptopToDelete.precio.toLocaleString("es-ES")}
+              </p>
+              <p className="text-yellow-400 text-xs mt-2">ID: {laptopToDelete.id}</p>
+            </div>
+            <p className="text-red-300 text-sm mb-6">⚠️ Esta acción no se puede deshacer.</p>
             <div className="flex gap-4">
               <button
                 onClick={confirmDelete}
-                className="flex-1 bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+                disabled={isDeleting}
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
               >
-                Sí, Eliminar
+                {isDeleting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    Eliminando...
+                  </>
+                ) : (
+                  "Sí, Eliminar"
+                )}
               </button>
               <button
-                onClick={() => {
-                  setShowDeleteModal(false)
-                  setLaptopToDelete(null)
-                }}
-                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+                onClick={cancelDelete}
+                disabled={isDeleting}
+                className="flex-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
               >
                 Cancelar
               </button>
             </div>
           </div>
         </div>
-      )}
+        
+      )
+      }
+      
     </main>
+    
   )
 }
