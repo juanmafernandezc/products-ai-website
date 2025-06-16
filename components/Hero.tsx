@@ -9,7 +9,7 @@ export default function Hero() {
   const [showError, setShowError] = useState(false)
 
   const scrollToProducts = (): void => {
-    const element = document.getElementById('productos')
+    const element = document.getElementById('products')
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' })
     }

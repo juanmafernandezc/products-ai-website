@@ -55,7 +55,7 @@ export default function Products() {
       
       console.log('Iniciando petición a la API externa...')
       
-      const response = await fetch('http://localhost:8000/api/Laptop', {
+      const response = await fetch('https://vm.juanma.dev/products-ai-api/api/Laptop', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

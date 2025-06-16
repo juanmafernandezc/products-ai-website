@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useUser, SignInButton, SignOutButton } from '@clerk/nextjs'
 import { useScrollToAnchor } from '../src/app/hooks/useNavigations'
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const { user, isSignedIn } = useUser()
@@ -21,6 +22,13 @@ export default function Header() {
   const handleNavigation = (path: string, section?: string) => {
     setIsMenuOpen(false)
     navigateToSection(path, section)
+  }
+
+  // Función para navegar directamente a agregar producto
+  const handleAdminClick = () => {
+    setIsMenuOpen(false)
+    // Navegar a la página de gestor de productos con el tab de agregar activo
+    router.push('/admin/agregar-producto')
   }
 
   return (
@@ -49,15 +57,16 @@ export default function Header() {
               </button>
             ))}
             
-            {/* Botón Admin */}
+            {/* Botón Admin - Va a la página de gestión de productos */}
             {isSignedIn && (
               <button
-                onClick={() => router.push('/admin/gestor-productos')}
-                className={`text-gray-300 hover:text-yellow-400 px-3 py-2 text-sm font-medium transition-colors duration-200 ${
+                onClick={handleAdminClick}
+                className={`text-gray-300 hover:text-yellow-400 px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${
                   pathname.includes('/admin') ? 'text-yellow-400' : ''
                 }`}
+                title="Gestionar Productos"
               >
-                🛠️ Admin
+                ➕ Agregar Producto
               </button>
             )}
           </nav>
@@ -110,13 +119,10 @@ export default function Header() {
               ))}
               {isSignedIn && (
                 <button
-                  onClick={() => {
-                    setIsMenuOpen(false)
-                    router.push('/admin/gestor-productos')
-                  }}
-                  className="text-gray-300 hover:text-yellow-400 px-3 py-2 text-left text-sm font-medium transition-colors duration-200"
+                  onClick={handleAdminClick}
+                  className="text-gray-300 hover:text-yellow-400 px-3 py-2 text-left text-sm font-medium transition-colors duration-200 flex items-center gap-2"
                 >
-                  🛠️ Administrar
+                  ➕ Agregar Producto
                 </button>
               )}
             </div>
