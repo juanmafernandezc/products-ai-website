@@ -26,7 +26,7 @@ export default function Home() {
   }
 
   return (
-     <main>
+    <main>
       <Header />
       <section id="hero">
         <Hero />
