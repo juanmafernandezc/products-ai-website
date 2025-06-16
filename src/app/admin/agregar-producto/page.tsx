@@ -486,12 +486,6 @@ export default function GestorProductos() {
                 <h2 className="text-2xl font-bold text-white">
                   Gestionar Laptops ({laptops.length})
                 </h2>
-                <button
-                  onClick={fetchLaptops}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
-                >
-                  🔄 Actualizar Lista
-                </button>
               </div>
 
               {/* Buscador */}
