@@ -1,117 +1,130 @@
 'use client'
-
 import { useState } from 'react'
-import Link from 'next/link'
-
+import { useRouter, usePathname } from 'next/navigation'
+import { useUser, SignInButton, SignOutButton } from '@clerk/nextjs'
+import { useScrollToAnchor } from '../src/app/hooks/useNavigations'
 export default function Header() {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const { user, isSignedIn } = useUser()
+  const router = useRouter()
+  const pathname = usePathname()
+  const { navigateToSection } = useScrollToAnchor()
 
-  const toggleMobileMenu = (): void => {
-    setIsMobileMenuOpen(!isMobileMenuOpen)
-  }
+  const navigationItems = [
+    { name: 'Inicio', path: '/', section: 'hero' },
+    { name: 'Categorías', path: '/', section: 'categories' },
+    { name: 'Productos', path: '/', section: 'products' },
+    { name: 'Nosotros', path: '/', section: 'about' },
+    { name: 'Contacto', path: '/', section: 'contact' }
+  ]
 
-  const closeMobileMenu = (): void => {
-    setIsMobileMenuOpen(false)
-  }
-
-  const scrollToSection = (sectionId: string): void => {
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    }
-    closeMobileMenu()
+  const handleNavigation = (path: string, section?: string) => {
+    setIsMenuOpen(false)
+    navigateToSection(path, section)
   }
 
   return (
-    <header className="bg-black/90 backdrop-blur-sm border-b border-gray-800 sticky top-0 z-50">
-      <nav className="max-w-6xl mx-auto px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
+    <header className="bg-gray-900 shadow-lg sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center py-4">
+          {/* Logo */}
+          <div className="flex items-center cursor-pointer"
+          onClick={() => handleNavigation('/', 'hero')}>
             <div className="h-8 w-8 bg-gray-700 rounded flex items-center justify-center">
               <span className="text-white font-bold text-lg">R</span>
             </div>
             <span className="ml-3 text-xl font-bold text-white">Rock4Code</span>
           </div>
 
-          <div className="hidden md:flex items-center space-x-8">
-            <button 
-              onClick={() => scrollToSection('productos')} 
-              className="nav-link text-gray-400"
-            >
-              Productos
-            </button>
-            <button 
-              onClick={() => scrollToSection('categorias')} 
-              className="nav-link text-gray-400"
-            >
-              Categorías
-            </button>
-            <button 
-              onClick={() => scrollToSection('nosotros')} 
-              className="nav-link text-gray-400"
-            >
-              Nosotros
-            </button>
-            <button 
-              onClick={() => scrollToSection('contacto')} 
-              className="nav-link text-gray-400"
-            >
-              Contacto
-            </button>
-            <button 
-              onClick={() => scrollToSection('productos')}
-              className="btn-primary px-6 py-2 rounded-lg text-white font-medium"
-            >
-              Ver Catálogo
-            </button>
-          </div>
+          {/* Navegación Desktop */}
+          <nav className="hidden md:flex space-x-8">
+            {navigationItems.map((item) => (
+              <button
+                key={item.name}
+                onClick={() => handleNavigation(item.path, item.section)}
+                className={`text-gray-300 hover:text-blue-400 px-3 py-2 text-sm font-medium transition-colors duration-200 ${
+                  pathname === item.path ? 'text-blue-400' : ''
+                }`}
+              >
+                {item.name}
+              </button>
+            ))}
+            
+            {/* Botón Admin */}
+            {isSignedIn && (
+              <button
+              onClick={() => {router.push('/admin/agregar-producto')}}                
+                className={`text-gray-300 hover:text-yellow-400 px-3 py-2 text-sm font-medium transition-colors duration-200 flex items-center gap-1 ${
+                  pathname.includes('/admin') ? 'text-yellow-400' : ''
+                }`}
+                title="Gestionar Productos"
+              >
+                ➕ Agregar Producto
+              </button>
+            )}
+          </nav>
 
-          <button 
-            onClick={toggleMobileMenu}
-            className="md:hidden text-gray-400 hover:text-white"
-          >
-            <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
+          {/* Autenticación */}
+          <div className="flex items-center space-x-4">
+            {isSignedIn ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-gray-300 text-sm">
+                  Hola, {user?.firstName || 'Usuario'}
+                </span>
+                <SignOutButton>
+                  <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200">
+                    Cerrar Sesión
+                  </button>
+                </SignOutButton>
+              </div>
+            ) : (
+              <SignInButton>
+                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200">
+                  Iniciar Sesión
+                </button>
+              </SignInButton>
+            )}
 
-        {/* Mobile Menu */}
-        <div className={`md:hidden mobile-menu ${isMobileMenuOpen ? '' : 'hidden'}`}>
-          <div className="px-2 pt-4 pb-6 space-y-4">
-            <button 
-              onClick={() => scrollToSection('productos')} 
-              className="block text-gray-400 hover:text-white py-2 w-full text-left"
+            {/* Botón menú móvil */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="md:hidden text-gray-300 hover:text-white p-2"
             >
-              Productos
-            </button>
-            <button 
-              onClick={() => scrollToSection('categorias')} 
-              className="block text-gray-400 hover:text-white py-2 w-full text-left"
-            >
-              Categorías
-            </button>
-            <button 
-              onClick={() => scrollToSection('nosotros')} 
-              className="block text-gray-400 hover:text-white py-2 w-full text-left"
-            >
-              Nosotros
-            </button>
-            <button 
-              onClick={() => scrollToSection('contacto')} 
-              className="block text-gray-400 hover:text-white py-2 w-full text-left"
-            >
-              Contacto
-            </button>
-            <button 
-              onClick={() => scrollToSection('productos')}
-              className="btn-primary w-full px-6 py-2 rounded-lg text-white font-medium mt-4"
-            >
-              Ver Catálogo
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
             </button>
           </div>
         </div>
-      </nav>
+
+        {/* Menú móvil */}
+        {isMenuOpen && (
+          <div className="md:hidden py-4 border-t border-gray-700">
+            <div className="flex flex-col space-y-3">
+              {navigationItems.map((item) => (
+                <button
+                  key={item.name}
+                  onClick={() => handleNavigation(item.path, item.section)}
+                  className="text-gray-300 hover:text-blue-400 px-3 py-2 text-left text-sm font-medium transition-colors duration-200"
+                >
+                  {item.name}
+                </button>
+              ))}
+              {isSignedIn && (
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false)
+                    router.push('/admin/agregar-producto')
+                  }}
+                  className="text-gray-300 hover:text-yellow-400 px-3 py-2 text-left text-sm font-medium transition-colors duration-200"
+                >
+                  🛠️ Administrar
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </header>
   )
 }
