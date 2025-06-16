@@ -12,8 +12,8 @@ interface ApiLaptop {
   marca: string;
   modelo: string;
   procesador: string;
-  ramGb: number;
-  almacenamientoGb: number;
+  ramgb: number;
+  almacenamientogb: number;
   precio: number;
   pulgadas: number;
   tarjetaGrafica: string;
@@ -40,8 +40,8 @@ export default function Products() {
       precio: apiLaptop.precio,
       imagen: apiLaptop.image,
       procesador: apiLaptop.procesador,
-      ramgb: `${apiLaptop.ramGb}GB`,
-      almacenamientogb: `${apiLaptop.almacenamientoGb}GB`,
+      ramgb: `${apiLaptop.ramgb}GB`,
+      almacenamientogb: `${apiLaptop.almacenamientogb}GB`,
       pulgadas: `${apiLaptop.pulgadas}"`,
       grafica: apiLaptop.tarjetaGrafica,
       descripcion: apiLaptop.descripcion
@@ -55,7 +55,7 @@ export default function Products() {
       
       console.log('Iniciando petición a la API externa...')
       
-      const response = await fetch('http://localhost:8000/api/Laptop', {
+      const response = await fetch('https://vm.juanma.dev/products-ai-api/api/Laptop', {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

@@ -55,7 +55,7 @@ class LaptopService {
   private baseUrl: string;
 
   constructor() {
-    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/Laptop';
+    this.baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://vm.juanma.dev/products-ai-api/api/Laptop';
   }
 
   // Convertir datos de la API al formato del frontend
