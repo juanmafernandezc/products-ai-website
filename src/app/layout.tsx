@@ -1,35 +1,29 @@
-import './globals.css'
-import FloatingNav from '../../components/FloatingNav'
-import { Metadata } from 'next'
-import {
-  ClerkProvider,
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from '@clerk/nextjs'
-import { Geist, Geist_Mono } from 'next/font/google'
-import { dark } from '@clerk/themes'; // Asegúrate de importar 'dark' si viene de Clerk
+import type React from "react"
+import "./globals.css"
+import type { Metadata } from "next"
+import { ClerkProvider } from "@clerk/nextjs"
+import { Geist, Geist_Mono } from "next/font/google"
+import { dark } from "@clerk/themes"
 
 const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
+  variable: "--font-geist-sans",
+  subsets: ["latin"],
 })
 
 const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
-  subsets: ['latin'],
+  variable: "--font-geist-mono",
+  subsets: ["latin"],
 })
 
 export const metadata: Metadata = {
-  title: 'Rock4Code - Tienda de Portátiles',
-  description: 'Los mejores portátiles del mercado para trabajo, gaming, estudios y más. Encuentra el portátil perfecto para cada necesidad y presupuesto.',
-  keywords: 'portátiles, laptops, gaming, trabajo, estudiantes, Apple, ASUS, Lenovo, Dell',
+  title: "Rock4Code - Tienda de Portátiles",
+  description:
+    "Los mejores portátiles del mercado para trabajo, gaming, estudios y más. Encuentra el portátil perfecto para cada necesidad y presupuesto.",
+  keywords: "portátiles, laptops, gaming, trabajo, estudiantes, Apple, ASUS, Lenovo, Dell",
   openGraph: {
-    title: 'Rock4Code - Tienda de Portátiles',
-    description: 'Los mejores portátiles del mercado para trabajo, gaming, estudios y más.',
-    type: 'website',
+    title: "Rock4Code - Tienda de Portátiles",
+    description: "Los mejores portátiles del mercado para trabajo, gaming, estudios y más.",
+    type: "website",
   },
 }
 
@@ -41,31 +35,17 @@ export default function RootLayout({ children }: RootLayoutProps) {
   return (
     <ClerkProvider
       appearance={{
-        baseTheme: dark, // Asumiendo que 'dark' se importa de @clerk/themes
+        baseTheme: dark,
         variables: {
           colorPrimary: "#4f46e5",
           colorText: "#ffffff",
-          colorBackground: "#0f172a", // un azul oscuro (slate-900)
+          colorBackground: "#0f172a",
           borderRadius: "0.5rem",
         },
       }}
     >
       <html lang="es" suppressHydrationWarning>
-        {/* Aquí combinamos las clases de cuerpo de ambas versiones.
-            La segunda versión tenía 'bg-gray-900 text-white',
-            la primera tenía `${geistSans.variable} ${geistMono.variable} bg-black text-gray-100 min-h-screen antialiased`.
-            Podemos combinar y ajustar según lo desees. */}
         <body className={`${geistSans.variable} ${geistMono.variable} bg-gray-900 text-white min-h-screen antialiased`}>
-          {/* Mantenemos el encabezado de la primera versión si es lo que deseas */}
-          <header className="flex justify-end items-center p-4 gap-4 h-16">
-            <SignedOut>
-              <SignInButton />
-              <SignUpButton />
-            </SignedOut>
-            <SignedIn>
-              <UserButton />
-            </SignedIn>
-          </header>
           {children}
         </body>
       </html>

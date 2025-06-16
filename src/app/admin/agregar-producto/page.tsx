@@ -208,9 +208,9 @@ export default function GestorProductos() {
 
   const cancelDelete = () => {
     console.log("Cancelando eliminación")
-      setShowDeleteModal(false)
-      setLaptopToDelete(null)
-      setIsDeleting(false)
+    setShowDeleteModal(false)
+    setLaptopToDelete(null)
+    setIsDeleting(false)
   }
 
   const filteredLaptops = laptops.filter(
@@ -259,19 +259,18 @@ export default function GestorProductos() {
     </div>
   )
 
-  const checkApiConnection = async () => {
-    try {
-      const isHealthy = await laptopService.checkApiHealth()
-      if (isHealthy) {
-        setSuccessMessage("✅ Conexión con la API establecida correctamente")
-        await fetchLaptops()
-      } else {
-        setError("❌ No se puede conectar con la API. Verifica que esté ejecutándose.")
-      }
-    } catch (error) {
-      setError("❌ Error al verificar conexión con la API")
+  useEffect(() => {
+    if (showDeleteModal) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = "unset"
     }
-  }
+
+    // Cleanup function to restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = "unset"
+    }
+  }, [showDeleteModal])
 
   return (
     <main className="min-h-screen bg-gray-900">
@@ -289,12 +288,6 @@ export default function GestorProductos() {
                 <span className="text-white font-semibold">Estado de la API:</span>
                 <span className="text-green-400">🟢 Conectado</span>
               </div>
-              <button
-                onClick={checkApiConnection}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm transition-colors duration-200"
-              >
-                🔄 Verificar Conexión
-              </button>
             </div>
           </div>
 
@@ -546,12 +539,6 @@ export default function GestorProductos() {
             <div className="bg-gray-800 rounded-lg p-8 shadow-xl">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-white">Gestionar Laptops ({laptops.length})</h2>
-                <button
-                  onClick={fetchLaptops}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
-                >
-                  🔄 Actualizar Lista
-                </button>
               </div>
 
               <div className="mb-6">
@@ -629,32 +616,61 @@ export default function GestorProductos() {
           )}
         </div>
       </section>
-
-      <Footer />
-
-      {/* Modal de confirmación de eliminación al final de la página */}
       {showDeleteModal && laptopToDelete && (
-        
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-gray-800 rounded-lg p-8 max-w-md w-full mx-4">
-            <h3 className="text-xl font-bold text-white mb-4">🗑️ Confirmar Eliminación</h3>
-            <p className="text-gray-300 mb-2">¿Estás seguro de que deseas eliminar esta laptop?</p>
-            <div className="bg-gray-700 rounded-lg p-4 mb-4">
-              <p className="text-white font-semibold">
+        <div
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[99999] p-4"
+          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              cancelDelete()
+            }
+          }}
+        >
+          <div
+            className="bg-gray-800 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl border border-gray-600 transform animate-in fade-in zoom-in duration-300 relative"
+            style={{ zIndex: 100000 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <span className="text-2xl">🗑️</span>
+                Confirmar Eliminación
+              </h3>
+              <button
+                onClick={cancelDelete}
+                disabled={isDeleting}
+                className="text-gray-400 hover:text-white transition-colors p-1 rounded-full hover:bg-gray-700"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <p className="text-gray-300 mb-4">¿Estás seguro de que deseas eliminar esta laptop?</p>
+
+            <div className="bg-gray-700 rounded-lg p-4 mb-4 border border-gray-600">
+              <p className="text-white font-semibold text-lg">
                 {laptopToDelete.marca} {laptopToDelete.modelo}
               </p>
-              
-              <p className="text-gray-400 text-sm">
+              <p className="text-gray-400 text-sm mt-1">
                 {laptopToDelete.categoria} • €{laptopToDelete.precio.toLocaleString("es-ES")}
               </p>
-              <p className="text-yellow-400 text-xs mt-2">ID: {laptopToDelete.id}</p>
+              <p className="text-yellow-400 text-xs mt-2 font-mono">ID: {laptopToDelete.id}</p>
             </div>
-            <p className="text-red-300 text-sm mb-6">⚠️ Esta acción no se puede deshacer.</p>
-            <div className="flex gap-4">
+
+            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3 mb-6">
+              <p className="text-red-300 text-sm flex items-center gap-2">
+                <span className="text-lg">⚠️</span>
+                Esta acción no se puede deshacer.
+              </p>
+            </div>
+
+            <div className="flex gap-3">
               <button
                 onClick={confirmDelete}
                 disabled={isDeleting}
-                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                className="flex-1 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800"
               >
                 {isDeleting ? (
                   <>
@@ -662,25 +678,25 @@ export default function GestorProductos() {
                     Eliminando...
                   </>
                 ) : (
-                  "Sí, Eliminar"
+                  <>
+                    <span>🗑️</span>
+                    Sí, Eliminar
+                  </>
                 )}
               </button>
+
               <button
                 onClick={cancelDelete}
                 disabled={isDeleting}
-                className="flex-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-500 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-200"
+                className="flex-1 bg-gray-600 hover:bg-gray-700 disabled:bg-gray-500 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800"
               >
-                Cancelar
+                <span>❌</span> Cancelar
               </button>
             </div>
           </div>
         </div>
-        
-      )
-      }
-      
+      )}
+      <Footer />
     </main>
-    
   )
 }
-
