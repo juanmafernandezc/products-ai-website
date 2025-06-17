@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useUser } from '@clerk/nextjs'
 import ProductCard from './ProductCard'
 import { Laptop } from '../src/types/laptops'
 
@@ -20,11 +21,32 @@ interface ApiLaptop {
   descripcion: string;
 }
 
+// Interfaces para la búsqueda con IA
+interface BusquedaRequest {
+  consulta: string;
+}
+
+interface BusquedaResponse {
+  consultaOriginal: string;
+  totalEncontrados: number;
+  laptops: ApiLaptop[];
+  timestamp: string;
+}
+
 export default function Products() {
+  const { user, isSignedIn } = useUser()
   const [laptops, setLaptops] = useState<Laptop[]>([])
+  const [laptopsOriginales, setLaptopsOriginales] = useState<Laptop[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>('todos')
+  
+  // Estados para búsqueda IA
+  const [consultaIA, setConsultaIA] = useState<string>('')
+  const [buscandoIA, setBuscandoIA] = useState(false)
+  const [errorBusquedaIA, setErrorBusquedaIA] = useState<string | null>(null)
+  const [mostrandoResultadosIA, setMostrandoResultadosIA] = useState(false)
+  const [ultimaConsulta, setUltimaConsulta] = useState<string>('')
 
   useEffect(() => {
     fetchLaptops()
@@ -59,11 +81,7 @@ export default function Products() {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
-          // Agregar headers adicionales si tu API los requiere
-          // 'Authorization': 'Bearer token',
-          // 'Accept': 'application/json',
         },
-        // Agregar mode si tienes problemas de CORS
         mode: 'cors',
       })
       
@@ -88,6 +106,7 @@ export default function Products() {
       
       console.log('Laptops convertidas:', laptopsConvertidas)
       setLaptops(laptopsConvertidas)
+      setLaptopsOriginales(laptopsConvertidas) // Guardar copia original
       
     } catch (error) {
       console.error('Error completo:', error)
@@ -103,10 +122,79 @@ export default function Products() {
     }
   }
 
-  // Filtrar por categoría
-  const laptopsFiltrados = categoriaSeleccionada === 'todos' 
+  // Función para buscar con IA
+  const buscarConIA = async () => {
+    if (!consultaIA.trim()) {
+      setErrorBusquedaIA('Por favor ingresa una consulta de búsqueda')
+      return
+    }
+
+    try {
+      setBuscandoIA(true)
+      setErrorBusquedaIA(null)
+      
+      const requestBody: BusquedaRequest = {
+        consulta: consultaIA.trim()
+      }
+
+      console.log('Enviando consulta a IA:', requestBody)
+
+      const response = await fetch('https://vm.juanma.dev/products-ai-api/api/Gemini/buscar-laptops', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        mode: 'cors',
+        body: JSON.stringify(requestBody)
+      })
+
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Error en búsqueda IA:', errorText)
+        throw new Error(`Error ${response.status}: ${response.statusText}`)
+      }
+
+      const data: BusquedaResponse = await response.json()
+      console.log('Respuesta de IA:', data)
+
+      // Convertir y mostrar resultados
+      const laptopsEncontradas = data.laptops.map(convertApiToLaptop)
+      setLaptops(laptopsEncontradas)
+      setMostrandoResultadosIA(true)
+      setUltimaConsulta(consultaIA)
+      setCategoriaSeleccionada('todos') // Reset categoria filter
+
+    } catch (error) {
+      console.error('Error en búsqueda IA:', error)
+      setErrorBusquedaIA(error instanceof Error ? error.message : 'Error en la búsqueda con IA')
+    } finally {
+      setBuscandoIA(false)
+    }
+  }
+
+  // Función para limpiar búsqueda IA
+  const limpiarBusquedaIA = () => {
+    setConsultaIA('')
+    setLaptops(laptopsOriginales)
+    setMostrandoResultadosIA(false)
+    setUltimaConsulta('')
+    setErrorBusquedaIA(null)
+    setCategoriaSeleccionada('todos')
+  }
+
+  // Manejar Enter en el input
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      buscarConIA()
+    }
+  }
+
+  // Filtrar por categoría (solo si no estamos mostrando resultados de IA)
+  const laptopsFiltrados = mostrandoResultadosIA 
     ? laptops 
-    : laptops.filter(laptop => laptop.categoria === categoriaSeleccionada)
+    : (categoriaSeleccionada === 'todos' 
+        ? laptops 
+        : laptops.filter(laptop => laptop.categoria === categoriaSeleccionada))
 
   const categorias = [
     { id: 'todos', nombre: 'Todos' },
@@ -177,22 +265,104 @@ export default function Products() {
           </p>
         </div>
 
-        {/* Filtros por categoría */}
-        <div className="flex flex-wrap justify-center gap-4 mb-12">
-          {categorias.map((categoria) => (
-            <button
-              key={categoria.id}
-              onClick={() => setCategoriaSeleccionada(categoria.id)}
-              className={`px-6 py-2 rounded-full font-semibold transition-all duration-200 ${
-                categoriaSeleccionada === categoria.id
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
-              }`}
-            >
-              {categoria.nombre}
-            </button>
-          ))}
-        </div>
+        {/* Búsqueda con IA - Solo para usuarios autenticados */}
+        {isSignedIn && (
+          <div className="mb-12">
+            <div className="max-w-4xl mx-auto">
+              <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 rounded-lg p-6 border border-purple-500/20">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-sm">🤖</span>
+                  </div>
+                  <h3 className="text-xl font-semibold text-white">Búsqueda Inteligente</h3>
+                  <div className="px-2 py-1 bg-purple-600/20 rounded-full">
+                    <span className="text-xs text-purple-300">IA</span>
+                  </div>
+                </div>
+                
+                <p className="text-gray-300 text-sm mb-4">
+                  Describe qué tipo de laptop necesitas en lenguaje natural. Ejemplo: "Laptops que soporten Cyberpunk 2077"
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-3">
+                  <div className="flex-1">
+                    <input
+                      type="text"
+                      value={consultaIA}
+                      onChange={(e) => setConsultaIA(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                      placeholder="Escribe tu consulta aquí... (ej: 'Laptops para gaming con presupuesto de $1500')"
+                      className="w-full px-4 py-3 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                      disabled={buscandoIA}
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={buscarConIA}
+                      disabled={buscandoIA || !consultaIA.trim()}
+                      className="px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 min-w-[100px] flex items-center justify-center"
+                    >
+                      {buscandoIA ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                          <span>Buscando...</span>
+                        </div>
+                      ) : (
+                        '🔍 Buscar'
+                      )}
+                    </button>
+                    
+                    {mostrandoResultadosIA && (
+                      <button
+                        onClick={limpiarBusquedaIA}
+                        className="px-4 py-3 bg-gray-700 text-white rounded-lg font-medium hover:bg-gray-600 transition-colors"
+                        title="Limpiar búsqueda"
+                      >
+                        ✖️
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Error de búsqueda IA */}
+                {errorBusquedaIA && (
+                  <div className="mt-4 p-3 bg-red-900/20 border border-red-500/50 rounded-lg">
+                    <p className="text-red-400 text-sm">{errorBusquedaIA}</p>
+                  </div>
+                )}
+
+                {/* Indicador de resultados IA */}
+                {mostrandoResultadosIA && (
+                  <div className="mt-4 p-3 bg-purple-900/20 border border-purple-500/50 rounded-lg">
+                    <p className="text-purple-300 text-sm">
+                      <span className="font-medium">Búsqueda IA:</span> "{ultimaConsulta}" - 
+                      <span className="ml-1">{laptops.length} resultado{laptops.length !== 1 ? 's' : ''} encontrado{laptops.length !== 1 ? 's' : ''}</span>
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Filtros por categoría - Solo mostrar si no hay resultados de IA */}
+        {!mostrandoResultadosIA && (
+          <div className="flex flex-wrap justify-center gap-4 mb-12">
+            {categorias.map((categoria) => (
+              <button
+                key={categoria.id}
+                onClick={() => setCategoriaSeleccionada(categoria.id)}
+                className={`px-6 py-2 rounded-full font-semibold transition-all duration-200 ${
+                  categoriaSeleccionada === categoria.id
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-800 text-gray-300 hover:bg-gray-700 border border-gray-700'
+                }`}
+              >
+                {categoria.nombre}
+              </button>
+            ))}
+          </div>
+        )}
 
         <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8">
           {laptopsFiltrados.map((laptop, index) => (
@@ -205,11 +375,34 @@ export default function Products() {
         </div>
 
         {/* Mensaje cuando no hay productos en la categoría */}
-        {laptopsFiltrados.length === 0 && laptops.length > 0 && (
+        {laptopsFiltrados.length === 0 && laptops.length > 0 && !mostrandoResultadosIA && (
           <div className="text-center py-12">
             <p className="text-xl text-gray-400">
               No se encontraron productos en esta categoría.
             </p>
+          </div>
+        )}
+
+        {/* Mensaje cuando la búsqueda IA no devuelve resultados */}
+        {laptopsFiltrados.length === 0 && mostrandoResultadosIA && (
+          <div className="text-center py-12">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl">🤖</span>
+              </div>
+              <p className="text-xl text-gray-400 mb-2">
+                No se encontraron laptops que coincidan con tu búsqueda
+              </p>
+              <p className="text-sm text-gray-500 mb-4">
+                Intenta con una consulta diferente o más específica
+              </p>
+              <button
+                onClick={limpiarBusquedaIA}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+              >
+                Ver todos los productos
+              </button>
+            </div>
           </div>
         )}
 
