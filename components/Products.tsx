@@ -237,7 +237,7 @@ export default function Products() {
                 onClick={() => window.open('http://localhost:8000/api/Laptop', '_blank')}
                 className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
               >
-                Probar API
+                PROBAR API
               </button>
             </div>
             {/* Información de debug */}
