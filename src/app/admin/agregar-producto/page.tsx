@@ -609,16 +609,16 @@ export default function GestorProductos() {
                           onClick={() => handleEdit(laptop)}
                           className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-lg transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center gap-1"
                         >
-                          <span className="sm:hidden">✏️</span>
-                          <span className="hidden sm:inline">✏️ Editar</span>
+                          
+                          <span >✏️ Editar</span>
                         </button>
                         <button
                           onClick={() => handleDelete(laptop)}
                           className="bg-red-600 hover:bg-red-700 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-lg transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center gap-1"
                           title={`Eliminar ${laptop.marca} ${laptop.modelo}`}
                         >
-                          <span className="sm:hidden">🗑️</span>
-                          <span className="hidden sm:inline">🗑️ Eliminar</span>
+                          
+                          <span>🗑️ Eliminar</span>
                         </button>
                       </div>
                     </div>
