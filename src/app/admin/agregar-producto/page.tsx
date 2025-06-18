@@ -77,6 +77,19 @@ export default function GestorProductos() {
     }
   }
 
+    useEffect(() => {
+    if (showDeleteModal) {
+      document.body.style.overflow = "hidden"
+    } else {
+      document.body.style.overflow = "unset"
+    }
+
+    // Cleanup function to restore scroll when component unmounts
+    return () => {
+      document.body.style.overflow = "unset"
+    }
+  }, [showDeleteModal])
+
   if (!isLoaded) {
     return (
       <main className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -259,18 +272,7 @@ export default function GestorProductos() {
     </div>
   )
 
-  useEffect(() => {
-    if (showDeleteModal) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = "unset"
-    }
 
-    // Cleanup function to restore scroll when component unmounts
-    return () => {
-      document.body.style.overflow = "unset"
-    }
-  }, [showDeleteModal])
 
   return (
     <main className="min-h-screen bg-gray-900">
