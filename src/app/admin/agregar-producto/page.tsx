@@ -234,37 +234,37 @@ export default function GestorProductos() {
   )
 
   const BackToHomeButton = () => (
-    <div className="flex justify-between items-center mb-6">
+    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
       <button
         onClick={() => router.push("/")}
-        className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition-colors duration-200"
+        className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm sm:text-base"
       >
         ← Volver al Inicio
       </button>
-      <h1 className="text-3xl font-bold text-white">Panel de Administración</h1>
-      <div></div>
+      <h1 className="text-xl sm:text-3xl font-bold text-white text-center sm:text-left">Panel de Administración</h1>
+      <div className="hidden sm:block"></div>
     </div>
   )
 
   const QuickAccessButtons = () => (
-    <div className="bg-gray-800 rounded-lg p-6 mb-8">
-      <h3 className="text-white font-semibold mb-4">Acceso Rápido</h3>
-      <div className="flex flex-wrap gap-3">
+    <div className="bg-gray-800 rounded-lg p-3 sm:p-6 mb-4 sm:mb-8">
+      <h3 className="text-white font-semibold mb-3 sm:mb-4 text-sm sm:text-base">Acceso Rápido</h3>
+      <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
         <button
           onClick={() => navigateToSection("/", "products")}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm justify-center sm:justify-start"
         >
           🛍️ Ver Productos Públicos
         </button>
         <button
           onClick={() => navigateToSection("/", "categories")}
-          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+          className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm justify-center sm:justify-start"
         >
           📂 Ver Categorías
         </button>
         <button
           onClick={() => navigateToSection("/", "contact")}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+          className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2 text-sm justify-center sm:justify-start"
         >
           📞 Contacto
         </button>
@@ -276,72 +276,78 @@ export default function GestorProductos() {
     <main className="min-h-screen bg-gray-900">
       <Header />
 
-      <section className="py-16 px-6">
+      <section className="py-8 px-3 sm:py-16 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <BackToHomeButton />
           <QuickAccessButtons />
 
           {/* Panel de estado de la API */}
-          <div className="bg-gray-800 rounded-lg p-4 mb-6">
+          <div className="bg-gray-800 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
             <div className="flex justify-between items-center">
-              <div className="flex items-center gap-3">
-                <span className="text-white font-semibold">Estado de la API:</span>
-                <span className="text-green-400">🟢 Conectado</span>
+              <div className="flex items-center gap-2 sm:gap-3">
+                <span className="text-white font-semibold text-sm sm:text-base">Estado de la API:</span>
+                <span className="text-green-400 text-sm sm:text-base">🟢 Conectado</span>
               </div>
             </div>
           </div>
 
           {/* Mensajes de estado */}
           {error && (
-            <div className="bg-red-600 text-white p-4 rounded-lg mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-xl">⚠️</span>
-                <span>{error}</span>
+            <div className="bg-red-600 text-white p-3 sm:p-4 rounded-lg mb-4 sm:mb-6 flex items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <span className="text-lg sm:text-xl flex-shrink-0">⚠️</span>
+                <span className="text-sm sm:text-base break-words">{error}</span>
               </div>
-              <button onClick={() => setError(null)} className="text-white hover:text-gray-200 text-xl">
+              <button
+                onClick={() => setError(null)}
+                className="text-white hover:text-gray-200 text-lg sm:text-xl flex-shrink-0"
+              >
                 ✕
               </button>
             </div>
           )}
 
           {successMessage && (
-            <div className="bg-green-600 text-white p-4 rounded-lg mb-6 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-xl">✅</span>
-                <span>{successMessage}</span>
+            <div className="bg-green-600 text-white p-3 sm:p-4 rounded-lg mb-4 sm:mb-6 flex items-start sm:items-center justify-between gap-3">
+              <div className="flex items-start sm:items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                <span className="text-lg sm:text-xl flex-shrink-0">✅</span>
+                <span className="text-sm sm:text-base break-words">{successMessage}</span>
               </div>
-              <button onClick={() => setSuccessMessage(null)} className="text-white hover:text-gray-200 text-xl">
+              <button
+                onClick={() => setSuccessMessage(null)}
+                className="text-white hover:text-gray-200 text-lg sm:text-xl flex-shrink-0"
+              >
                 ✕
               </button>
             </div>
           )}
 
           {/* Navegación por tabs */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-gray-800 rounded-lg p-1 flex">
+          <div className="flex justify-center mb-6 sm:mb-8 px-1">
+            <div className="bg-gray-800 rounded-lg p-1 flex w-full sm:w-auto">
               <button
                 onClick={() => setActiveTab("add")}
-                className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
+                className={`flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-200 text-sm sm:text-base ${
                   activeTab === "add" ? "bg-blue-600 text-white" : "text-gray-300 hover:text-white"
                 }`}
               >
-                {editingId ? "✏️ Editar Laptop" : "➕ Agregar Laptop"}
+                {editingId ? "✏️ Editar" : "➕ Agregar"}
               </button>
               <button
                 onClick={() => setActiveTab("manage")}
-                className={`px-6 py-3 rounded-md font-semibold transition-all duration-200 ${
+                className={`flex-1 sm:flex-none px-3 sm:px-6 py-2 sm:py-3 rounded-md font-semibold transition-all duration-200 text-sm sm:text-base ${
                   activeTab === "manage" ? "bg-blue-600 text-white" : "text-gray-300 hover:text-white"
                 }`}
               >
-                🛠️ Gestionar Laptops ({laptops.length})
+                🛠️ Gestionar ({laptops.length})
               </button>
             </div>
           </div>
 
           {/* Formulario de agregar/editar */}
           {activeTab === "add" && (
-            <div className="bg-gray-800 rounded-lg p-8 shadow-xl">
-              <h1 className="text-3xl font-bold text-white mb-8 text-center">
+            <div className="bg-gray-800 rounded-lg p-4 sm:p-8 shadow-xl">
+              <h1 className="text-xl sm:text-3xl font-bold text-white mb-6 sm:mb-8 text-center">
                 {editingId ? "Editar Laptop" : "Agregar Nueva Laptop"}
               </h1>
 
@@ -536,18 +542,20 @@ export default function GestorProductos() {
 
           {/* Panel de gestión */}
           {activeTab === "manage" && (
-            <div className="bg-gray-800 rounded-lg p-4 shadow-xl">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-white">Gestionar Laptops ({laptops.length})</h2>
+            <div className="bg-gray-800 rounded-lg p-3 sm:p-4 shadow-xl">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6 gap-3">
+                <h2 className="text-xl sm:text-2xl font-bold text-white text-center sm:text-left">
+                  Gestionar Laptops ({laptops.length})
+                </h2>
               </div>
 
-              <div className="mb-6">
+              <div className="mb-4 sm:mb-6">
                 <input
                   type="text"
                   placeholder="Buscar por modelo, marca o categoría..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full p-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none"
+                  className="w-full p-3 bg-gray-700 text-white rounded-lg border border-gray-600 focus:border-blue-500 focus:outline-none text-sm sm:text-base"
                 />
               </div>
 
@@ -559,10 +567,13 @@ export default function GestorProductos() {
                   </p>
                 </div>
               ) : (
-                <div className="grid gap-3">
+                <div className="space-y-2 sm:space-y-3">
                   {filteredLaptops.map((laptop, index) => (
-                    <div key={laptop.id} className="bg-gray-700 rounded-lg p-4 flex items-center gap-4">
-                      <div className="w-16 h-16 bg-gray-600 rounded-lg flex-shrink-0 overflow-hidden">
+                    <div
+                      key={laptop.id}
+                      className="bg-gray-700 rounded-lg p-3 sm:p-4 flex items-center gap-3 sm:gap-4 min-w-0"
+                    >
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-600 rounded-lg flex-shrink-0 overflow-hidden">
                         <img
                           src={laptop.image || "/placeholder.svg"}
                           alt={laptop.modelo}
@@ -577,35 +588,37 @@ export default function GestorProductos() {
                         </div>
                       </div>
 
-                      <div className="flex-1 min-w-0">
-                        <h3 className="text-white font-semibold text-base truncate">
+                      <div className="flex-1 min-w-0 overflow-hidden">
+                        <h3 className="text-white font-semibold text-sm sm:text-base truncate">
                           {laptop.marca} {laptop.modelo}
                         </h3>
-                        <div className="flex items-center gap-2 text-sm">
-                          <span className="text-gray-300 capitalize">{laptop.categoria}</span>
-                          <span className="text-gray-500">•</span>
-                          <span className="text-blue-400 font-semibold">
+                        <div className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm">
+                          <span className="text-gray-300 capitalize truncate">{laptop.categoria}</span>
+                          <span className="text-gray-500 flex-shrink-0">•</span>
+                          <span className="text-blue-400 font-semibold flex-shrink-0">
                             €{laptop.precio.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
                           </span>
                         </div>
-                        <p className="text-gray-400 text-xs">
+                        <p className="text-gray-400 text-xs truncate">
                           {laptop.procesador} • {laptop.ramgb}GB • {laptop.almacenamientogb}GB • {laptop.pulgadas}"
                         </p>
                       </div>
 
-                      <div className="flex gap-2 flex-shrink-0">
+                      <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 flex-shrink-0">
                         <button
                           onClick={() => handleEdit(laptop)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm flex items-center gap-1"
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-lg transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center gap-1"
                         >
-                          ✏️ Editar
+                          <span className="sm:hidden">✏️</span>
+                          <span className="hidden sm:inline">✏️ Editar</span>
                         </button>
                         <button
                           onClick={() => handleDelete(laptop)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm flex items-center gap-1"
+                          className="bg-red-600 hover:bg-red-700 text-white px-2 sm:px-3 py-1 sm:py-2 rounded-lg transition-colors duration-200 text-xs sm:text-sm flex items-center justify-center gap-1"
                           title={`Eliminar ${laptop.marca} ${laptop.modelo}`}
                         >
-                          🗑️
+                          <span className="sm:hidden">🗑️</span>
+                          <span className="hidden sm:inline">🗑️</span>
                         </button>
                       </div>
                     </div>
@@ -618,7 +631,7 @@ export default function GestorProductos() {
       </section>
       {showDeleteModal && laptopToDelete && (
         <div
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[99999] p-4"
+          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[99999] p-3 sm:p-4"
           style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}
           onClick={(e) => {
             if (e.target === e.currentTarget) {
@@ -627,7 +640,7 @@ export default function GestorProductos() {
           }}
         >
           <div
-            className="bg-gray-800 rounded-xl p-8 max-w-md w-full mx-4 shadow-2xl border border-gray-600 transform animate-in fade-in zoom-in duration-300 relative"
+            className="bg-gray-800 rounded-xl p-4 sm:p-8 max-w-sm sm:max-w-md w-full mx-2 sm:mx-4 shadow-2xl border border-gray-600 transform animate-in fade-in zoom-in duration-300 relative"
             style={{ zIndex: 100000 }}
             onClick={(e) => e.stopPropagation()}
           >
