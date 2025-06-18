@@ -618,7 +618,7 @@ export default function GestorProductos() {
                           title={`Eliminar ${laptop.marca} ${laptop.modelo}`}
                         >
                           <span className="sm:hidden">🗑️</span>
-                          <span className="hidden sm:inline">🗑️</span>
+                          <span className="hidden sm:inline">🗑️ Eliminar</span>
                         </button>
                       </div>
                     </div>

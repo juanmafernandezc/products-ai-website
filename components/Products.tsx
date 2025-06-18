@@ -48,9 +48,18 @@ export default function Products() {
   const [mostrandoResultadosIA, setMostrandoResultadosIA] = useState(false)
   const [ultimaConsulta, setUltimaConsulta] = useState<string>('')
 
+  // Estados para paginación
+  const [paginaActual, setPaginaActual] = useState(1)
+  const PRODUCTOS_POR_PAGINA = 6
+
   useEffect(() => {
     fetchLaptops()
   }, [])
+
+  // Resetear página cuando cambian los filtros
+  useEffect(() => {
+    setPaginaActual(1)
+  }, [categoriaSeleccionada, mostrandoResultadosIA])
 
   // Función para convertir datos de la API al formato de la interfaz Laptop
   const convertApiToLaptop = (apiLaptop: ApiLaptop): Laptop => {
@@ -180,6 +189,7 @@ export default function Products() {
     setUltimaConsulta('')
     setErrorBusquedaIA(null)
     setCategoriaSeleccionada('todos')
+    setPaginaActual(1)
   }
 
   // Manejar Enter en el input
@@ -195,6 +205,43 @@ export default function Products() {
     : (categoriaSeleccionada === 'todos' 
         ? laptops 
         : laptops.filter(laptop => laptop.categoria === categoriaSeleccionada))
+
+  // Cálculos de paginación
+  const totalPaginas = Math.ceil(laptopsFiltrados.length / PRODUCTOS_POR_PAGINA)
+  const indiceInicio = (paginaActual - 1) * PRODUCTOS_POR_PAGINA
+  const indiceFin = indiceInicio + PRODUCTOS_POR_PAGINA
+  const laptopsPaginados = laptopsFiltrados.slice(indiceInicio, indiceFin)
+
+  // Funciones de navegación de página
+  const irAPagina = (pagina: number) => {
+    setPaginaActual(pagina)
+    // Scroll suave hacia la sección de productos
+    document.getElementById('productos')?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  const paginaAnterior = () => {
+    if (paginaActual > 1) {
+      irAPagina(paginaActual - 1)
+    }
+  }
+
+  const paginaSiguiente = () => {
+    if (paginaActual < totalPaginas) {
+      irAPagina(paginaActual + 1)
+    }
+  }
+
+  // Generar números de página para mostrar
+  const generarNumerosPagina = () => {
+    const numeros: number[] = []
+    const rango = 2 // Mostrar 2 páginas antes y después de la actual
+
+    for (let i = Math.max(1, paginaActual - rango); i <= Math.min(totalPaginas, paginaActual + rango); i++) {
+      numeros.push(i)
+    }
+
+    return numeros
+  }
 
   const categorias = [
     { id: 'todos', nombre: 'Todos' },
@@ -261,7 +308,12 @@ export default function Products() {
             Selección premium de los mejores portátiles del mercado
           </p>
           <p className="text-sm text-blue-400 mt-2">
-            {laptops.length} producto{laptops.length !== 1 ? 's' : ''} disponible{laptops.length !== 1 ? 's' : ''}
+            {laptopsFiltrados.length} producto{laptopsFiltrados.length !== 1 ? 's' : ''} disponible{laptopsFiltrados.length !== 1 ? 's' : ''}
+            {totalPaginas > 1 && (
+              <span className="ml-2">
+                - Página {paginaActual} de {totalPaginas}
+              </span>
+            )}
           </p>
         </div>
 
@@ -364,8 +416,9 @@ export default function Products() {
           </div>
         )}
 
-        <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8">
-          {laptopsFiltrados.map((laptop, index) => (
+        {/* Grid de productos paginados */}
+        <div className="grid lg:grid-cols-3 md:grid-cols-2 gap-8 min-h-[600px]">
+          {laptopsPaginados.map((laptop, index) => (
             <ProductCard 
               key={laptop.id} 
               laptop={laptop} 
@@ -373,6 +426,78 @@ export default function Products() {
             />
           ))}
         </div>
+
+        {/* Controles de paginación */}
+        {totalPaginas > 1 && (
+          <div className="mt-12 flex justify-center items-center">
+            <div className="flex items-center gap-2">
+              {/* Botón anterior */}
+              <button
+                onClick={paginaAnterior}
+                disabled={paginaActual === 1}
+                className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg font-medium hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                <span>←</span>
+                <span className="hidden sm:inline">Anterior</span>
+              </button>
+
+              {/* Primera página si no está visible */}
+              {generarNumerosPagina()[0] > 1 && (
+                <>
+                  <button
+                    onClick={() => irAPagina(1)}
+                    className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                  >
+                    1
+                  </button>
+                  {generarNumerosPagina()[0] > 2 && (
+                    <span className="text-gray-500 px-2">...</span>
+                  )}
+                </>
+              )}
+
+              {/* Números de página */}
+              {generarNumerosPagina().map((numeroPagina) => (
+                <button
+                  key={numeroPagina}
+                  onClick={() => irAPagina(numeroPagina)}
+                  className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                    numeroPagina === paginaActual
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  }`}
+                >
+                  {numeroPagina}
+                </button>
+              ))}
+
+              {/* Última página si no está visible */}
+              {generarNumerosPagina()[generarNumerosPagina().length - 1] < totalPaginas && (
+                <>
+                  {generarNumerosPagina()[generarNumerosPagina().length - 1] < totalPaginas - 1 && (
+                    <span className="text-gray-500 px-2">...</span>
+                  )}
+                  <button
+                    onClick={() => irAPagina(totalPaginas)}
+                    className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg font-medium hover:bg-gray-700 transition-colors"
+                  >
+                    {totalPaginas}
+                  </button>
+                </>
+              )}
+
+              {/* Botón siguiente */}
+              <button
+                onClick={paginaSiguiente}
+                disabled={paginaActual === totalPaginas}
+                className="px-4 py-2 bg-gray-800 text-gray-300 rounded-lg font-medium hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+              >
+                <span className="hidden sm:inline">Siguiente</span>
+                <span>→</span>
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Mensaje cuando no hay productos en la categoría */}
         {laptopsFiltrados.length === 0 && laptops.length > 0 && !mostrandoResultadosIA && (
