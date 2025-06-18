@@ -77,7 +77,7 @@ export default function GestorProductos() {
     }
   }
 
-    useEffect(() => {
+  useEffect(() => {
     if (showDeleteModal) {
       document.body.style.overflow = "hidden"
     } else {
@@ -271,8 +271,6 @@ export default function GestorProductos() {
       </div>
     </div>
   )
-
-
 
   return (
     <main className="min-h-screen bg-gray-900">
@@ -538,7 +536,7 @@ export default function GestorProductos() {
 
           {/* Panel de gestión */}
           {activeTab === "manage" && (
-            <div className="bg-gray-800 rounded-lg p-8 shadow-xl">
+            <div className="bg-gray-800 rounded-lg p-4 shadow-xl">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="text-2xl font-bold text-white">Gestionar Laptops ({laptops.length})</h2>
               </div>
@@ -561,10 +559,10 @@ export default function GestorProductos() {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="grid gap-3">
                   {filteredLaptops.map((laptop, index) => (
-                    <div key={laptop.id} className="bg-gray-700 rounded-lg p-6 flex items-center gap-6">
-                      <div className="w-20 h-20 bg-gray-600 rounded-lg flex-shrink-0 overflow-hidden">
+                    <div key={laptop.id} className="bg-gray-700 rounded-lg p-4 flex items-center gap-4">
+                      <div className="w-16 h-16 bg-gray-600 rounded-lg flex-shrink-0 overflow-hidden">
                         <img
                           src={laptop.image || "/placeholder.svg"}
                           alt={laptop.modelo}
@@ -580,34 +578,34 @@ export default function GestorProductos() {
                       </div>
 
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-white font-semibold text-lg truncate">
+                        <h3 className="text-white font-semibold text-base truncate">
                           {laptop.marca} {laptop.modelo}
                         </h3>
-                        <p className="text-gray-300 text-sm capitalize">
-                          {laptop.categoria} • {laptop.procesador}
-                        </p>
-                        <p className="text-blue-400 font-semibold">
-                          €{laptop.precio.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
-                        </p>
+                        <div className="flex items-center gap-2 text-sm">
+                          <span className="text-gray-300 capitalize">{laptop.categoria}</span>
+                          <span className="text-gray-500">•</span>
+                          <span className="text-blue-400 font-semibold">
+                            €{laptop.precio.toLocaleString("es-ES", { minimumFractionDigits: 2 })}
+                          </span>
+                        </div>
                         <p className="text-gray-400 text-xs">
-                          {laptop.ramgb}GB RAM • {laptop.almacenamientogb}GB • {laptop.pulgadas}"
+                          {laptop.procesador} • {laptop.ramgb}GB • {laptop.almacenamientogb}GB • {laptop.pulgadas}"
                         </p>
-                        <p className="text-gray-500 text-xs">ID: {laptop.id}</p>
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 flex-shrink-0">
                         <button
                           onClick={() => handleEdit(laptop)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm flex items-center gap-1"
                         >
                           ✏️ Editar
                         </button>
                         <button
                           onClick={() => handleDelete(laptop)}
-                          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors duration-200 flex items-center gap-2"
+                          className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-colors duration-200 text-sm flex items-center gap-1"
                           title={`Eliminar ${laptop.marca} ${laptop.modelo}`}
                         >
-                          🗑️ Eliminar
+                          🗑️
                         </button>
                       </div>
                     </div>
