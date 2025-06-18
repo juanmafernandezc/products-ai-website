@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { useUser, SignInButton, UserButton } from "@clerk/nextjs"
+import { useUser, SignInButton,SignUpButton,  UserButton } from "@clerk/nextjs"
 import { useScrollToAnchor } from "../src/app/hooks/useNavigations"
 
 export default function Header() {
@@ -84,11 +84,18 @@ export default function Header() {
           {/* Autenticación para usuarios no logueados */}
           <div className="flex items-center space-x-4">
             {!isSignedIn && (
-              <SignInButton>
-                <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200">
-                  Iniciar Sesión
-                </button>
-              </SignInButton>
+              <div className="flex items-center space-x-2">
+                <SignInButton>
+                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200">
+                    Iniciar Sesión
+                  </button>
+                </SignInButton>
+                <SignUpButton>
+                  <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200">
+                    Registrarse
+                  </button>
+                </SignUpButton>
+              </div>
             )}
 
             {/* Botón menú móvil */}
@@ -113,6 +120,20 @@ export default function Header() {
                   {item.name}
                 </button>
               ))}
+              {!isSignedIn && (
+                <div className="flex flex-col space-y-2 px-3 py-2">
+                  <SignInButton>
+                    <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200 w-full">
+                      Iniciar Sesión
+                    </button>
+                  </SignInButton>
+                  <SignUpButton>
+                    <button className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200 w-full">
+                      Registrarse
+                    </button>
+                  </SignUpButton>
+                </div>
+              )}
               {isSignedIn && (
                 <button
                   onClick={() => {
