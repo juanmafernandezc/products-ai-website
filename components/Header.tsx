@@ -1,7 +1,7 @@
 "use client"
 import { useState } from "react"
 import { useRouter, usePathname } from "next/navigation"
-import { useUser, SignInButton,SignUpButton,  UserButton } from "@clerk/nextjs"
+import { useUser, SignInButton, SignUpButton, UserButton } from "@clerk/nextjs"
 import { useScrollToAnchor } from "../src/app/hooks/useNavigations"
 
 export default function Header() {
@@ -81,10 +81,10 @@ export default function Header() {
             )}
           </nav>
 
-          {/* Autenticación para usuarios no logueados */}
+          {/* Autenticación para usuarios no logueados - Solo Desktop */}
           <div className="flex items-center space-x-4">
             {!isSignedIn && (
-              <div className="flex items-center space-x-2">
+              <div className="hidden md:flex items-center space-x-2">
                 <SignInButton>
                   <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200">
                     Iniciar Sesión
@@ -120,6 +120,8 @@ export default function Header() {
                   {item.name}
                 </button>
               ))}
+
+              {/* Botones de autenticación solo en menú móvil */}
               {!isSignedIn && (
                 <div className="flex flex-col space-y-2 px-3 py-2">
                   <SignInButton>
@@ -134,6 +136,7 @@ export default function Header() {
                   </SignUpButton>
                 </div>
               )}
+
               {isSignedIn && (
                 <button
                   onClick={() => {
@@ -145,6 +148,7 @@ export default function Header() {
                   🛠️ Administrar
                 </button>
               )}
+
               {/* UserButton en móvil */}
               {isSignedIn && (
                 <div className="px-3 py-2">

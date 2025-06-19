@@ -50,16 +50,31 @@ export default function Products() {
 
   // Estados para paginación
   const [paginaActual, setPaginaActual] = useState(1)
-  const PRODUCTOS_POR_PAGINA = 6
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Detectar si es móvil
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth <= 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+
+  // Productos por página según el dispositivo
+  const PRODUCTOS_POR_PAGINA = isMobile ? 3 : 6
 
   useEffect(() => {
     fetchLaptops()
   }, [])
 
-  // Resetear página cuando cambian los filtros
+  // Resetear página cuando cambian los filtros o el tamaño de pantalla
   useEffect(() => {
     setPaginaActual(1)
-  }, [categoriaSeleccionada, mostrandoResultadosIA])
+  }, [categoriaSeleccionada, mostrandoResultadosIA, isMobile])
 
   // Función para convertir datos de la API al formato de la interfaz Laptop
   const convertApiToLaptop = (apiLaptop: ApiLaptop): Laptop => {
@@ -234,7 +249,7 @@ export default function Products() {
   // Generar números de página para mostrar
   const generarNumerosPagina = () => {
     const numeros: number[] = []
-    const rango = 2 // Mostrar 2 páginas antes y después de la actual
+    const rango = isMobile ? 1 : 2 // En móvil mostrar menos números de página
 
     for (let i = Math.max(1, paginaActual - rango); i <= Math.min(totalPaginas, paginaActual + rango); i++) {
       numeros.push(i)
@@ -315,6 +330,12 @@ export default function Products() {
               </span>
             )}
           </p>
+          {/* Indicador de modo móvil para debug */}
+          {isMobile && (
+            <p className="text-xs text-gray-500 mt-1">
+              Mostrando {PRODUCTOS_POR_PAGINA} productos por página (móvil)
+            </p>
+          )}
         </div>
 
         {/* Búsqueda con IA - Solo para usuarios autenticados */}
